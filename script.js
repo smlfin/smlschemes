@@ -16,10 +16,10 @@ const urlsToCache = [
   './icons/icon-384x384.png',
   './icons/icon-512x512.png',
   // Add image paths for service worker cache
-  './images/sml.jpeg',
-  './images/vfl.jpeg',
-  './images/snl.jpeg',
-  './images/default.jpeg'
+  './images/sml.jpg',
+  './images/vfl.jpg',
+  './images/snl.jpg',
+  './images/default.jpg'
 ];
 
 // Service Worker Registration
