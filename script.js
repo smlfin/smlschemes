@@ -1,5 +1,5 @@
 // Increment CACHE_NAME for Service Worker update to force fresh load of ALL files
-const CACHE_NAME = 'investment-comparator-v23'; // NEW VERSION for RD integration
+const CACHE_NAME = 'investment-comparator-v27'; // NEW VERSION for Dynamic Period Input (Sangeeth & NCD) and NCD Payout Fix
 const urlsToCache = [
   './',
   './index.html',
@@ -50,7 +50,7 @@ const investmentData = {
             {
                 "monthly": "12.5%",
                 "yearly": "Not Available",
-                "period": "10 YEARS",
+                "period": "10 YEARS", // This is the MAX period, but user can input a shorter one
                 "remarks": "2 Lakhs to less than 15 Lakhs",
                 "closureRemark": "Closure allowed after 1 year.",
                 "closureTerms": [
@@ -64,7 +64,7 @@ const investmentData = {
             {
                 "monthly": "13%",
                 "yearly": "Not Available",
-                "period": "10 YEARS",
+                "period": "10 YEARS", // This is the MAX period
                 "remarks": "15 Lakhs & above",
                 "closureRemark": "Closure allowed after 1 year.",
                 "closureTerms": [
@@ -90,7 +90,7 @@ const investmentData = {
             {
                 "monthly": "12.5%",
                 "yearly": "13.0%",
-                "period": "10 YEARS",
+                "period": "10 YEARS", // This is the MAX period
                 "remarks": "5 Lakhs to less than 15 Lakhs",
                 "closureRemark": "Closure allowed after 1 year.",
                 "closureTerms": [
@@ -104,7 +104,7 @@ const investmentData = {
             {
                 "monthly": "13.0%",
                 "yearly": "13.5%",
-                "period": "10 YEARS",
+                "period": "10 YEARS", // This is the MAX period
                 "remarks": "15 Laksh & above",
                 "closureRemark": "Closure allowed after 1 year.",
                 "closureTerms": [
@@ -120,7 +120,8 @@ const investmentData = {
     "SANGEETH NIDHI": {
         "Sangeeth Nidhi Deposits": [
             { "period": "6 MONTHS to Less than 1 Year", "yearly": "9%", "remarks": "5000 and above", "type": "SD" },
-            { "period": "1 Year to 5 Years", "monthly": "12%", "yearly": "12.50%", "remarks": "5000 and above", "type": "SD" }
+            { "period": "1 Year to less than 3Years", "monthly": "11.50%", "yearly": "12.00%", "remarks": "5000 and above", "type": "SD" },
+            { "period": "3 Year to 5 Years", "monthly": "12%", "yearly": "12.50%", "remarks": "5000 and above", "type": "SD" }
         ]
     },
     // --- NEW: Recurring Deposit Product Category ---
@@ -145,7 +146,7 @@ const productSelect = document.getElementById('product-select');
 const allOptionsView = document.getElementById('all-options-view');
 const selectedCompanyNameAll = document.getElementById('selected-company-name-all');
 const selectedProductNameAll = document.getElementById('selected-product-name-all');
-const productOptionsGrid = document.getElementById('product-options-grid'); // Renamed from productDetailsDiv
+const productOptionsGrid = document.getElementById('product-options-grid'); 
 
 // Elements for "Single Option + Calculator" view
 const singleOptionCalculatorView = document.getElementById('single-option-calculator-view');
@@ -157,6 +158,10 @@ const changeOptionButton = document.getElementById('change-option-button');
 const investmentAmountInput = document.getElementById('investment-amount');
 const calculatorResultsDiv = document.getElementById('calculator-results');
 const goToCalculatorLink = document.getElementById('go-to-calculator-link'); // Get the header link
+
+// NEW DOM elements for Period Input
+const investmentPeriodInput = document.getElementById('investment-period');
+const investmentPeriodControl = document.getElementById('investment-period-control');
 
 
 // Global state variables
@@ -176,6 +181,10 @@ function showAllOptionsView() {
     singleOptionCalculatorView.classList.add('hidden');
     allOptionsView.classList.remove('hidden');
     investmentAmountInput.value = ''; // Clear calculator input when changing view
+    // NEW: Clear period input and hide
+    if (investmentPeriodInput) investmentPeriodInput.value = '';
+    if (investmentPeriodControl) investmentPeriodControl.classList.add('hidden');
+
     calculatorResultsDiv.innerHTML = '<p class="placeholder-text">Enter an amount and select a product option above to calculate returns.</p>';
     resetAmountConstraints(); // Reset calculator constraints
     // Update header company/product names for this view
@@ -195,8 +204,6 @@ function showSingleOptionCalculatorView() {
     singleOptionCalculatorView.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-// --- Data Population and Display Functions ---
-
 function populateProductSelect(companyName) {
     productSelect.innerHTML = '<option value="">-- Select a product type --</option>'; // Clarified text
     productSelect.disabled = true;
@@ -209,6 +216,10 @@ function populateProductSelect(companyName) {
     currentSelectedDetailForCalc = null;
     currentSelectedDetailIndex = -1; // Reset selected index
     resetAmountConstraints();
+    // NEW: Hide period control on company/product change
+    if (investmentPeriodInput) investmentPeriodInput.value = '';
+    if (investmentPeriodControl) investmentPeriodControl.classList.add('hidden');
+
 
     if (companyName && investmentData[companyName]) {
         const products = Object.keys(investmentData[companyName]);
@@ -233,6 +244,10 @@ function displayProductOptions(companyName, productName) {
     currentSelectedDetailForCalc = null;
     currentSelectedDetailIndex = -1; // Reset selected index
     showAllOptionsView(); // Ensure we are in the all-options view
+    // NEW: Hide period control on product change
+    if (investmentPeriodInput) investmentPeriodInput.value = '';
+    if (investmentPeriodControl) investmentPeriodControl.classList.add('hidden');
+
 
     if (!companyName || !productName || !investmentData[companyName] || !investmentData[companyName][productName]) {
         productOptionsGrid.innerHTML = '<p class="placeholder-text">Select a company and a product type to view available options.</p>';
@@ -322,8 +337,56 @@ function handleOptionSelection(index, clickedCard) {
     currentSelectedDetailForCalc = currentSelectedProductOptions[index];
     currentSelectedDetailIndex = index; // Store the index of the selected item
     setAmountConstraints(currentSelectedDetailForCalc);
+    // NEW: Set period constraints and visibility
+    setPeriodConstraintsAndVisibility(companySelect.value, productSelect.value);
+
     displaySingleProductDetailsAndCalculator(companySelect.value, productSelect.value, currentSelectedDetailForCalc);
     calculateInvestmentReturns(); // Perform initial calculation
+}
+
+
+// NEW Function to control period input visibility and constraints
+function setPeriodConstraintsAndVisibility(companyName, productName) {
+    // Check if the necessary DOM elements exist
+    if (!investmentPeriodControl || !investmentPeriodInput) return;
+
+    const isSangeethNidhi = companyName === "SANGEETH NIDHI";
+    const isNCD = productName.toLowerCase().includes('ncd');
+    const isFixedPeriod = !isSangeethNidhi && !isNCD; // SD 5.5 Year, Doubling have fixed periods
+
+    if (isFixedPeriod) {
+        // Hide and clear for fixed period products
+        investmentPeriodControl.classList.add('hidden');
+        investmentPeriodInput.value = '';
+        investmentPeriodInput.classList.remove('invalid-input');
+        return;
+    }
+
+    // Show and set constraints for flexible period products
+    investmentPeriodControl.classList.remove('hidden');
+    investmentPeriodInput.classList.remove('invalid-input');
+    
+    if (isSangeethNidhi) {
+        // Sangeeth Nidhi: 1 to 5 years
+        investmentPeriodInput.min = '1';
+        investmentPeriodInput.max = '5';
+        investmentPeriodInput.placeholder = '1 to 5 Years';
+        // Clear value if outside new range or no value
+        const currentVal = parseFloat(investmentPeriodInput.value);
+        if (isNaN(currentVal) || currentVal < 1 || currentVal > 5) {
+            investmentPeriodInput.value = '';
+        }
+    } else if (isNCD) {
+        // NCD: 1 to 10 years
+        investmentPeriodInput.min = '1';
+        investmentPeriodInput.max = '10';
+        investmentPeriodInput.placeholder = '1 to 10 Years';
+        // Clear value if outside new range or no value
+        const currentVal = parseFloat(investmentPeriodInput.value);
+        if (isNaN(currentVal) || currentVal < 1 || currentVal > 10) {
+            investmentPeriodInput.value = '';
+        }
+    }
 }
 
 
@@ -351,7 +414,7 @@ function displaySingleProductDetailsAndCalculator(companyName, productName, deta
         cardContent += `<p><strong>Minimum Monthly Deposit:</strong> ₹ ${detail.minAmount.toLocaleString('en-IN')}</p>`;
     } else if (companyName === "SANGEETH NIDHI") {
         if (detail.period) {
-            cardContent += `<p><strong>For Period:</strong> ${detail.period}</p>`;
+            cardContent += `<p><strong>Rate Based On Period:</strong> ${detail.period}</p>`;
         }
     } else {
         // For other companies, display remarks as "For Amount"
@@ -362,8 +425,8 @@ function displaySingleProductDetailsAndCalculator(companyName, productName, deta
             remarkText = remarkText.trim();
             cardContent += `<p><strong>For Amount:</strong> ${remarkText}</p>`;
         }
-        if (detail.period) { // Still display period if it exists and is relevant
-            cardContent += `<p><strong>Period:</strong> ${detail.period}</p>`;
+        if (detail.period && !isNCDProduct) { // Do not show default NCD period if user must input
+            cardContent += `<p><strong>Fixed Period:</strong> ${detail.period}</p>`;
         }
     }
 
@@ -406,7 +469,7 @@ function displaySingleProductDetailsAndCalculator(companyName, productName, deta
 }
 
 
-// --- Calculator Logic (modified to include RD) ---
+// --- Calculator Logic ---
 
 // Function to safely parse percentage strings
 function parsePercentage(value) {
@@ -415,6 +478,113 @@ function parsePercentage(value) {
         return isNaN(num) ? null : num / 100;
     }
     return null;
+}
+
+// Helper function to get the total period in months from the period string or user input (UPDATED)
+function getPeriodInMonths(detailPeriod) {
+    // 1. Check for valid user input (only visible for NCD/Sangeeth Nidhi)
+    if (investmentPeriodControl && !investmentPeriodControl.classList.contains('hidden')) {
+        const userYears = parseFloat(investmentPeriodInput.value);
+        if (!isNaN(userYears) && userYears > 0) {
+            return Math.round(userYears * 12);
+        }
+    }
+
+    // 2. Fallback to parsing the product's default period string (for SD 5.5 Year, Doubling, etc.)
+    let period_in_months = 0;
+    const lowerPeriod = detailPeriod.toLowerCase();
+
+    if (lowerPeriod.includes('5.5 years')) {
+        period_in_months = 66;
+    } else if (lowerPeriod.includes('10 years')) {
+        period_in_months = 120;
+    } else if (lowerPeriod.includes('year')) {
+        const yearMatch = lowerPeriod.match(/(\d+\.?\d*)\s*year/i);
+        if (yearMatch) {
+            const years = parseFloat(yearMatch[1]);
+            period_in_months = Math.round(years * 12);
+        } else if (lowerPeriod.includes('6 months to less than 1 year')) {
+            period_in_months = 11; // Max 11 months for the "less than 1 year" period
+        } else if (lowerPeriod.includes('1 year to less than 3years')) {
+            period_in_months = 35; // Max 35 months for the "less than 3 years" period
+        } else if (lowerPeriod.includes('3 year to 5 years')) {
+            period_in_months = 60; // Max 60 months for the "up to 5 years" period
+        }
+    }
+    return period_in_months;
+}
+
+
+// Helper function to calculate RD maturity for monthly interest reinvestment
+function calculateRdConversion(amount, monthlyRateStr, total_period_in_months) {
+    const monthlyRate = parsePercentage(monthlyRateStr);
+
+    if (monthlyRate === null || total_period_in_months <= 0) return '';
+
+    // Calculate the monthly deposit amount (the interest earned monthly from SD/NCD)
+    const monthly_deposit_amount = amount * monthlyRate / 12;
+    if (monthly_deposit_amount <= 0) return '';
+
+    // --- LOGIC FOR 60 MONTH RD LIMIT ---
+    const RD_MAX_PERIOD = 60; // 5 years
+
+    // 1. Determine RD Period and Remaining Period
+    const rd_period_in_months = Math.min(total_period_in_months, RD_MAX_PERIOD);
+    const remaining_principal_period = total_period_in_months - rd_period_in_months;
+
+    let rd_maturity_amount = 0;
+    let rd_total_deposit = 0;
+    let remaining_principal_interest = 0;
+
+    // 2. Calculate RD Maturity (for up to 60 months)
+    if (rd_period_in_months > 0) {
+        // Find the fixed RD rate from the data structure
+        const rdProductDetail = investmentData["Special Calculators"]["Recurring Deposit (RD)"][0];
+        const annualRatePercentage = rdProductDetail.fixedRate; 
+        
+        const r = annualRatePercentage / 400; // Quarterly interest rate (I3/400)
+        const n_quarters = rd_period_in_months / 3; // Total compounding periods (quarters)
+
+        const numerator = Math.pow((1 + r), n_quarters) - 1;
+        const denominator = 1 - Math.pow((1 + r), -1/3);
+
+        if (denominator !== 0) {
+            rd_maturity_amount = monthly_deposit_amount * (numerator / denominator);
+        }
+        rd_total_deposit = monthly_deposit_amount * rd_period_in_months;
+    }
+
+    // 3. Calculate Simple Interest on Principal for Remaining Period
+    if (remaining_principal_period > 0) {
+        // Simple Interest on Principal: P * R * T (where T is in years, R is annual rate used for SD/NCD)
+        remaining_principal_interest = amount * monthlyRate * (remaining_principal_period / 12);
+    }
+
+    // 4. Calculate Final Total Return
+    // Final Return = Principal + Interest on RD Maturity + Interest on Principal for Remaining Period
+    const rd_interest_earned = rd_maturity_amount - rd_total_deposit;
+    const total_interest_earned = rd_interest_earned + remaining_principal_interest;
+    const final_total_return = amount + total_interest_earned + rd_total_deposit; // Principal + Total Interest + Total Reinvested Deposit
+
+    const roundedMonthlyDeposit = Math.round(monthly_deposit_amount);
+    const roundedMaturity = Math.round(final_total_return);
+    const roundedInterest = Math.round(total_interest_earned);
+
+    let period_details = `RD Period: ${rd_period_in_months} Mths`;
+    if (remaining_principal_period > 0) {
+        period_details += ` + ${remaining_principal_period} Mths (Principal SI)`;
+    }
+    
+    // RETURN IN NICE BOX FORMAT 
+    return `
+        <div class="calculator-result-card rd-conversion-card">
+            <h4>Total Return (RD Conversion)</h4>
+            <p><strong>₹ ${roundedMaturity.toLocaleString('en-IN')}</strong></p>
+            <p class="small-text">Total Interest Earned: ₹ ${roundedInterest.toLocaleString('en-IN')}</p>
+            <p class="small-text">Monthly Interest Reinvested: ₹ ${roundedMonthlyDeposit.toLocaleString('en-IN')}</p>
+            <p class="small-text">${period_details}</p>
+        </div>
+    `;
 }
 
 // New function to parse the amount from the remarks string
@@ -476,7 +646,7 @@ function setAmountConstraints(detail) {
         allowedMinAmount = detail.minAmount;
         allowedMaxAmount = Infinity;
         investmentAmountInput.placeholder = `Enter monthly deposit (₹${detail.minAmount.toLocaleString('en-IN')} or more)`;
-        return; // Exit early as RD has its own logic
+        return; // Exit early as RD handled
     }
 
     // --- Existing logic for other products ---
@@ -544,7 +714,7 @@ function resetAmountConstraints() {
 }
 
 
-// Calculate Investment Returns (MODIFIED)
+// Calculate Investment Returns (MODIFIED to include Period Input validation and card generation)
 function calculateInvestmentReturns() {
     const amount = parseFloat(investmentAmountInput.value);
     calculatorResultsDiv.innerHTML = '';
@@ -564,64 +734,61 @@ function calculateInvestmentReturns() {
     const detail = currentSelectedDetailForCalc;
     const productName = currentSelectedProductType;
     const companyName = companySelect.value;
+    
+    // --- Period Input Validation (NEW) ---
+    let total_period_in_months = 0;
+    if (investmentPeriodControl && !investmentPeriodControl.classList.contains('hidden')) {
+        const userYears = parseFloat(investmentPeriodInput.value);
+        const minYears = parseFloat(investmentPeriodInput.min);
+        const maxYears = parseFloat(investmentPeriodInput.max);
 
-    // --- NEW: RD Calculator Logic (TOP PRIORITY) ---
+        if (isNaN(userYears) || userYears < minYears || userYears > maxYears) {
+            const range = maxYears === 10 ? '1 to 10' : '1 to 5';
+            calculatorResultsDiv.innerHTML = `<p class="error-message">Please enter a valid investment period (in years) between ${range} for this product.</p>`;
+            investmentPeriodInput.classList.add('invalid-input');
+            investmentAmountInput.classList.remove('invalid-input');
+            return;
+        }
+        total_period_in_months = Math.round(userYears * 12);
+        investmentPeriodInput.classList.remove('invalid-input');
+    }
+
+    // --- RD Calculator Logic ---
     if (detail.type === 'RD') {
-        // Validate amount specifically for RD (must be >= 1000)
         if (isNaN(amount) || amount < detail.minAmount) {
             calculatorResultsDiv.innerHTML = `<p class="error-message">Please enter a monthly deposit amount (₹${detail.minAmount.toLocaleString('en-IN')} or more) to see maturity details.</p>`;
             investmentAmountInput.classList.add('invalid-input');
             return;
         }
 
-        const annualRatePercentage = detail.fixedRate; // Use the fixed rate from RD product data
+        const annualRatePercentage = detail.fixedRate; 
 
-        let tableHTML = `
-            <table class="maturity-table">
-                <thead>
-                    <tr>
-                        <th>Period (Years)</th>
-                        <th>Maturity Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-        `;
+        let tableHTML = `<table class="maturity-table"><thead><tr><th>Period (Years)</th><th>Maturity Amount</th></tr></thead><tbody>`;
 
-        // Loop from 1 to 5 years for RD
         for (let years = 1; years <= 5; years++) {
             const r = annualRatePercentage / 400; // Quarterly interest rate (from RD formula: I3/400)
-            const n_quarters = (years * 12) / 3; // Total compounding periods (quarters: H3 = (B3*12)/3)
+            const n_quarters = (years * 12) / 3; 
 
-            // Implement the main maturity formula: A3 * (((1 + r)^H3 - 1) / (1 - ((1 + r)^(-1/3))))
             const numerator = Math.pow((1 + r), n_quarters) - 1;
             const denominator = 1 - Math.pow((1 + r), -1/3);
 
             let maturityAmount = 0;
-            if (denominator !== 0) { // Avoid division by zero
+            if (denominator !== 0) { 
                 maturityAmount = amount * (numerator / denominator);
             }
 
             const roundedMaturity = Math.round(maturityAmount);
 
-            tableHTML += `
-                <tr>
-                    <td>${years} Year${years > 1 ? 's' : ''}</td>
-                    <td>₹ ${roundedMaturity.toLocaleString('en-IN')}</td>
-                </tr>
-            `;
+            tableHTML += `<tr><td>${years} Year${years > 1 ? 's' : ''}</td><td>₹ ${roundedMaturity.toLocaleString('en-IN')}</td></tr>`;
         }
 
-        tableHTML += `
-                </tbody>
-            </table>
-        `;
+        tableHTML += `</tbody></table>`;
         calculatorResultsDiv.innerHTML = tableHTML;
-        investmentAmountInput.classList.remove('invalid-input'); // If validation passes
-        return; // Exit function after handling RD
+        investmentAmountInput.classList.remove('invalid-input'); 
+        return; 
     }
 
     // --- Existing Amount Validation for other products (Runs ONLY if not an RD product) ---
-    // If we reach here, it's not an RD product, so use the existing amount validation logic
     if (companyName === "SANGEETH NIDHI") {
         if (amount < 5000) {
             calculatorResultsDiv.innerHTML = `<p class="error-message">Please enter an amount of ₹ 5,000 or more for Sangeeth Nidhi.</p>`;
@@ -647,10 +814,15 @@ function calculateInvestmentReturns() {
 
     investmentAmountInput.classList.remove('invalid-input'); // If validation passes for non-RD
 
-    // --- Existing Calculation Logic for SD, Doubling, NCD (Runs ONLY if not an RD product) ---
-    const isDoublingProduct = productName.toLowerCase().includes('doubling');
-    const isNCDProduct = productName.toLowerCase().includes('ncd');
+    // --- Get Final Period in Months (Handles both fixed and user-defined periods) ---
+    if (total_period_in_months === 0) {
+        // Only if not set by user input validation above (i.e., for fixed-period products)
+        total_period_in_months = getPeriodInMonths(detail.period);
+    }
+    const period_in_months = total_period_in_months;
+    const period_in_years = period_in_months / 12;
 
+    // --- Core Calculation Logic for SD, Sangeeth Nidhi, NCD ---
     let resultsHTML = '';
 
     if (companyName === "Vanchinad Finance (P) Ltd" && productName === "Non-Convertible Debentures (NCD)") {
@@ -662,116 +834,109 @@ function calculateInvestmentReturns() {
         return;
     }
 
+    const isDoublingProduct = productName.toLowerCase().includes('doubling');
+    const isNCDProduct = productName.toLowerCase().includes('ncd');
 
     if (isDoublingProduct) {
         const maturityAmount = amount * 2;
-        resultsHTML += `
+        resultsHTML = `
             <div class="calculator-result-card">
                 <h4>Doubling Scheme Result</h4>
-                <p>Investment Amount: <strong>₹ ${amount.toLocaleString('en-IN')}</strong></p>
-                <p>Maturity Amount (Approx): <strong>₹ ${maturityAmount.toLocaleString('en-IN')}</strong></p>
-                <p>Period: ${detail.period}</p>
-                <p>Remarks: ${detail.doublingRemark}</p>
+                <p><strong>₹ ${maturityAmount.toLocaleString('en-IN')}</strong></p>
+                <p class="small-text">Investment Amount: ₹ ${amount.toLocaleString('en-IN')}</p>
+                <p class="small-text">Period: ${detail.period}</p>
             </div>
         `;
-    } else if (isNCDProduct) {
+    } else if (isNCDProduct || detail.type === 'SD') { 
+        
+        // --- Core Calculation ---
         const monthlyRate = parsePercentage(detail.monthly);
         const yearlyRate = parsePercentage(detail.yearly);
-
-        let monthlyInterestDisplay = '';
+        
+        let calculatedMonthlyInterest = 0;
         if (monthlyRate !== null) {
-            const calculatedMonthlyInterest = amount * monthlyRate / 12;
-            monthlyInterestDisplay = `₹ ${calculatedMonthlyInterest.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-        } else if (detail.monthly && (detail.monthly.toLowerCase().includes('not available') || detail.monthly.toLowerCase().includes('monthly'))) {
-            monthlyInterestDisplay = "Not Available";
-        } else {
-             monthlyInterestDisplay = "N/A";
+            calculatedMonthlyInterest = amount * monthlyRate / 12;
         }
 
-        let annualInterestDisplay = '';
+        let calculatedAnnualInterest = 0;
         if (yearlyRate !== null) {
-            const calculatedAnnualInterest = amount * yearlyRate;
-            annualInterestDisplay = `₹ ${calculatedAnnualInterest.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-        } else if (detail.yearly && detail.yearly.toLowerCase().includes('not available')) {
-             annualInterestDisplay = "Not Available";
-        } else {
-             annualInterestDisplay = "N/A";
+            // Use the ANNUAL rate and the period in YEARS for annual payout calculation
+            calculatedAnnualInterest = amount * yearlyRate;
         }
+        
+        // --- Monthly Payout Total Return Calculation ---
+        const totalInterestMonthly = calculatedMonthlyInterest * period_in_months;
+        const totalReturnMonthly = amount + totalInterestMonthly;
 
+        // --- Annual Payout Total Return Calculation ---
+        const totalInterestAnnual = calculatedAnnualInterest * period_in_years;
+        const totalReturnAnnual = amount + totalInterestAnnual;
 
-        resultsHTML += `
+        // --- Generate Result Cards ---
+
+        // 1. Monthly Interest Payout
+        const monthlyInterestCard = `
             <div class="calculator-result-card">
-                <h4>NCD Return Calculation</h4>
-                <p>Investment Amount: <strong>₹ ${amount.toLocaleString('en-IN')}</strong></p>
-                <p>Estimated Monthly Interest: <strong>${monthlyInterestDisplay}</strong></p>
-                <p>Estimated Annual Interest: <strong>${annualInterestDisplay}</strong></p>
-                <p>Period: ${detail.period}</p>
-                <p>Closure Remark: ${detail.closureRemark}</p>
-            </div>
-            <div class="calculator-result-card">
-                <h4>Premature Closure Interest Cut</h4>
-                <p>Refer to the table below for potential interest reductions if closed before maturity.</p>
-                <table class="closure-table">
-                    <thead>
-                        <tr>
-                            <th>Closure Period</th>
-                            <th>Interest Cut / Effective Rate</th> </tr>
-                    </thead>
-                    <tbody>`;
-                if (detail.closureTerms && detail.closureTerms.length > 0) {
-                    detail.closureTerms.forEach(term => {
-                        resultsHTML += `
-                            <tr>
-                                <td>${term.period}</td>
-                                <td>${term.cut}</td>
-                            </tr>
-                        `;
-                    });
-                } else {
-                    resultsHTML += `<tr><td colspan="2">No specific closure terms provided.</td></tr>`;
-                }
-                resultsHTML += `
-                    </tbody>
-                </table>
+                <h4>Monthly Interest Payout</h4>
+                <p><strong>${monthlyRate !== null ? `₹ ${Math.round(calculatedMonthlyInterest).toLocaleString('en-IN')}` : 'N/A'}</strong></p>
+                <p class="small-text">Interest Rate: ${detail.monthly || 'N/A'}</p>
             </div>
         `;
-    } else { // Handles SD and Sangeeth Nidhi Deposits
-        const monthlyRate = parsePercentage(detail.monthly);
-        const yearlyRate = parsePercentage(detail.yearly);
-
-        let monthlyInterestDisplay = '';
-        if (monthlyRate !== null) {
-            const calculatedMonthlyInterest = amount * monthlyRate / 12;
-            monthlyInterestDisplay = `₹ ${calculatedMonthlyInterest.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-        } else if (detail.monthly && detail.monthly.toLowerCase().includes('not available')) {
-            monthlyInterestDisplay = "Not Available";
-        } else {
-             monthlyInterestDisplay = "N/A";
-        }
-
-        let annualInterestDisplay = '';
-        if (yearlyRate !== null) {
-            const calculatedAnnualInterest = amount * yearlyRate;
-            annualInterestDisplay = `₹ ${calculatedAnnualInterest.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-        } else if (detail.yearly && detail.yearly.toLowerCase().includes('not available')) {
-             annualInterestDisplay = "Not Available";
-        } else {
-             annualInterestDisplay = "N/A";
-        }
-
-        resultsHTML += `
+        
+        // 2. Annual Interest Payout
+        const annualInterestCard = `
             <div class="calculator-result-card">
-                <h4>Estimated Interest Earnings</h4>
-                <p>Investment Amount: <strong>₹ ${amount.toLocaleString('en-IN')}</strong></p>
-                <p>Estimated Monthly Interest: <strong>${monthlyInterestDisplay}</strong></p>
-                <p>Estimated Annual Interest: <strong>${annualInterestDisplay}</strong></p>
-                <p>Period: ${detail.period}</p>
-                ${detail.generalRemark ? `<p class="general-remark"><strong>Important:</strong> ${detail.generalRemark}</p>` : ''}
+                <h4>Annual Interest Payout</h4>
+                <p><strong>${yearlyRate !== null && !isNCDProduct ? `₹ ${Math.round(calculatedAnnualInterest).toLocaleString('en-IN')}` : 'N/A'}</strong></p>
+                <p class="small-text">Interest Rate: ${detail.yearly || 'N/A'}</p>
             </div>
         `;
+        
+        // 3. Total Return (Monthly Payout) 
+        const monthlyMaturityCard = `
+            <div class="calculator-result-card">
+                <h4>Total Return (Monthly Payout)</h4>
+                <p><strong>₹ ${Math.round(totalReturnMonthly).toLocaleString('en-IN')}</strong></p>
+                <p class="small-text">Total Interest Earned: ₹ ${Math.round(totalInterestMonthly).toLocaleString('en-IN')}</p>
+                <p class="small-text">on ${period_in_months} Months</p>
+            </div>
+        `;
+
+        // 4. Annual Payout Total Return (Maturity) - HIDDEN FOR NCD
+        const annualMaturityCard = `
+            <div class="calculator-result-card">
+                <h4>Total Return (Annual Payout)</h4>
+                <p><strong>₹ ${Math.round(totalReturnAnnual).toLocaleString('en-IN')}</strong></p>
+                <p class="small-text">Total Interest Earned: ₹ ${Math.round(totalInterestAnnual).toLocaleString('en-IN')}</p>
+                <p class="small-text">on ${period_in_months} Months</p>
+            </div>
+        `;
+        
+        // 5. Monthly Interest Reinvestment (RD Conversion) 
+        let rdConversionResult = '';
+        if (detail.monthly) {
+            rdConversionResult = calculateRdConversion(amount, detail.monthly, period_in_months);
+        }
+
+        // Combine the results, excluding Annual Payout Total Return for NCD
+        resultsHTML = monthlyInterestCard;
+        
+        // Only include Annual Interest Payout if not NCD and a rate is available
+        if (!isNCDProduct) {
+            resultsHTML += annualInterestCard;
+        }
+
+        resultsHTML += monthlyMaturityCard;
+        
+        // Only include Annual Total Return if not NCD
+        if (!isNCDProduct) {
+            resultsHTML += annualMaturityCard;
+        }
+        
+        resultsHTML += rdConversionResult;
     }
 
-    calculatorResultsDiv.innerHTML = resultsHTML;
+    calculatorResultsDiv.innerHTML = `<div class="calculator-results-grid">${resultsHTML}</div>`;
 }
 
 // Event Listeners
@@ -788,6 +953,11 @@ productSelect.addEventListener('change', (event) => {
 
 // Listener for amount input
 investmentAmountInput.addEventListener('input', calculateInvestmentReturns);
+
+// NEW: Listener for period input
+if (investmentPeriodInput) {
+    investmentPeriodInput.addEventListener('input', calculateInvestmentReturns);
+}
 
 // Listener for the "Change Option" button
 changeOptionButton.addEventListener('click', () => {
@@ -811,5 +981,21 @@ goToCalculatorLink.addEventListener('click', function (e) {
 
 
 // Initial state
+function populateCompanySelect() {
+    // FIX: Clear existing options before repopulating to prevent duplication
+    companySelect.innerHTML = ''; 
+    
+    let defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = '-- Select a company --';
+    companySelect.appendChild(defaultOption);
+    
+    Object.keys(investmentData).forEach(company => {
+        const option = document.createElement('option');
+        option.value = company;
+        option.textContent = company;
+        companySelect.appendChild(option);
+    });
+}
 populateCompanySelect();
 showAllOptionsView(); // Ensure the selection view is shown initially

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'investment-comparator-v34'; // NEW VERSION (must match script.js)
+const CACHE_NAME = 'investment-comparator-v26'; // NEW VERSION (must match script.js)
 const urlsToCache = [
   './',
   './index.html',
