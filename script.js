@@ -129,7 +129,14 @@ const investmentData = {
         "Recurring Deposit (RD)": [
             {
                 "type": "RD", // Custom type to identify RD
-                "fixedRate": 12.12,
+                // !!! MODIFIED: Replaced fixedRate with rateStructure !!!
+                "rateStructure": {
+                    "1": 10.0, // 10% for 1 year
+                    "2": 10.0, // 10% for 2 years
+                    "3": 12.0, // 12% for 3 years
+                    "4": 12.0, // 12% for 4 years
+                    "5": 12.0  // 12% for 5 years
+                },
                 "minAmount": 1000, // Minimum monthly deposit for RD
                 "period": "1 to 5 Years", // A general period description for display
                 "displayRemarks": "Monthly Deposit (₹1000 or more)" // Custom remark for UI
@@ -514,6 +521,25 @@ function getPeriodInMonths(detailPeriod) {
     return period_in_months;
 }
 
+// --- NEW FUNCTION FROM REFERENCE CODE (newrd.js) ---
+// Function to calculate the core formula component (part of the maturity formula)
+// This implements the desired Monthly Compounding Annuity formula: ( (1+r)^n - 1 ) / ( 1 - (1+r)^-1 )
+// Where r = Int. Per / 100 / 12 (effective monthly rate) and n = No. of Installments (Months)
+function calculateSimpleAnnuityFormula(years, annualRatePercentage) {
+    // r = Monthly Rate Decimal
+    const r = annualRatePercentage / 100 / 12; 
+    const n = years * 12; // No. of Installments (Months)
+
+    // Factor = [ ( (1+r)^n - 1 ) / ( 1 - (1+r)^-1 ) ]
+    const numerator = Math.pow((1 + r), n) - 1;
+    const denominator = 1 - Math.pow((1 + r), -1);
+    
+    if (denominator === 0) {
+        return 0;
+    }
+
+    return numerator / denominator;
+}
 
 // Helper function to calculate RD maturity for monthly interest reinvestment
 function calculateRdConversion(amount, monthlyRateStr, total_period_in_months) {
@@ -535,22 +561,27 @@ function calculateRdConversion(amount, monthlyRateStr, total_period_in_months) {
     let rd_maturity_amount = 0;
     let rd_total_deposit = 0;
     let remaining_principal_interest = 0;
+    let annualRatePercentage = 0; // Declare here to fix ReferenceError
 
-    // 2. Calculate RD Maturity (for up to 60 months)
+    // 2. Calculate RD Maturity (for up to 60 months) (MODIFIED TO USE SIMPLE ANNUITY FORMULA)
     if (rd_period_in_months > 0) {
-        // Find the fixed RD rate from the data structure
+        // Find the RD rate structure from the data structure
         const rdProductDetail = investmentData["Special Calculators"]["Recurring Deposit (RD)"][0];
-        const annualRatePercentage = rdProductDetail.fixedRate; 
+        // !!! MODIFIED: Get rateStructure !!!
+        const rateStructure = rdProductDetail.rateStructure; 
         
-        const r = annualRatePercentage / 400; // Quarterly interest rate (I3/400)
-        const n_quarters = rd_period_in_months / 3; // Total compounding periods (quarters)
+        // Use the rate corresponding to the final year of the RD period.
+        const rd_period_in_years_decimal = rd_period_in_months / 12;
+        const rd_period_in_full_years = Math.ceil(rd_period_in_years_decimal); // Use ceil to determine the rate bucket
+        annualRatePercentage = rateStructure[rd_period_in_full_years.toString()] || rateStructure["5"]; // Use 5-year rate as fallback/max
+        
+        // --- NEW LOGIC: Use Simple Annuity Formula (from newrd.js) ---
+        const factor = calculateSimpleAnnuityFormula(rd_period_in_years_decimal, annualRatePercentage);
 
-        const numerator = Math.pow((1 + r), n_quarters) - 1;
-        const denominator = 1 - Math.pow((1 + r), -1/3);
+        rd_maturity_amount = monthly_deposit_amount * factor;
+        // --- END NEW LOGIC ---
 
-        if (denominator !== 0) {
-            rd_maturity_amount = monthly_deposit_amount * (numerator / denominator);
-        }
+        // Calculation of rd_total_deposit remains the same
         rd_total_deposit = monthly_deposit_amount * rd_period_in_months;
     }
 
@@ -561,7 +592,7 @@ function calculateRdConversion(amount, monthlyRateStr, total_period_in_months) {
     }
 
     // 4. Calculate Final Total Return
-    // Final Return = Principal + Interest on RD Maturity + Interest on Principal for Remaining Period
+   // Final Return = Principal + Interest on RD Maturity + Interest on Principal for Remaining Period
     const rd_interest_earned = rd_maturity_amount - rd_total_deposit;
     const total_interest_earned = rd_interest_earned + remaining_principal_interest;
     const final_total_return = amount + total_interest_earned + rd_total_deposit; // Principal + Total Interest + Total Reinvested Deposit
@@ -583,6 +614,7 @@ function calculateRdConversion(amount, monthlyRateStr, total_period_in_months) {
             <p class="small-text">Total Interest Earned: ₹ ${roundedInterest.toLocaleString('en-IN')}</p>
             <p class="small-text">Monthly Interest Reinvested: ₹ ${roundedMonthlyDeposit.toLocaleString('en-IN')}</p>
             <p class="small-text">${period_details}</p>
+            <p class="small-text-note">RD Rate Used: ${annualRatePercentage || 'N/A'}% (based on final RD year)</p>
         </div>
     `;
 }
@@ -754,32 +786,37 @@ function calculateInvestmentReturns() {
     }
 
     // --- RD Calculator Logic ---
-    if (detail.type === 'RD') {
+   if (detail.type === 'RD') {
         if (isNaN(amount) || amount < detail.minAmount) {
             calculatorResultsDiv.innerHTML = `<p class="error-message">Please enter a monthly deposit amount (₹${detail.minAmount.toLocaleString('en-IN')} or more) to see maturity details.</p>`;
             investmentAmountInput.classList.add('invalid-input');
             return;
         }
 
-        const annualRatePercentage = detail.fixedRate; 
+        // !!! MODIFIED: Get rateStructure instead of fixedRate !!!
+        const rateStructure = detail.rateStructure; 
 
-        let tableHTML = `<table class="maturity-table"><thead><tr><th>Period (Years)</th><th>Maturity Amount</th></tr></thead><tbody>`;
+        let tableHTML = `<table class="maturity-table"><thead><tr><th>Period (Years)</th><th>Rate</th><th>Maturity Amount</th></tr></thead><tbody>`; // Added Rate column
 
         for (let years = 1; years <= 5; years++) {
-            const r = annualRatePercentage / 400; // Quarterly interest rate (from RD formula: I3/400)
-            const n_quarters = (years * 12) / 3; 
-
-            const numerator = Math.pow((1 + r), n_quarters) - 1;
-            const denominator = 1 - Math.pow((1 + r), -1/3);
-
-            let maturityAmount = 0;
-            if (denominator !== 0) { 
-                maturityAmount = amount * (numerator / denominator);
+            // !!! MODIFIED: Get annualRatePercentage based on the year !!!
+            const annualRatePercentage = rateStructure[years.toString()]; 
+            
+            if (!annualRatePercentage) {
+                // Should not happen if rateStructure is correctly defined
+                tableHTML += `<tr><td>${years} Year${years > 1 ? 's' : ''}</td><td>N/A</td><td>Error</td></tr>`;
+                continue;
             }
+
+            // --- NEW LOGIC: Use Simple Annuity Formula (from newrd.js) ---
+            const factor = calculateSimpleAnnuityFormula(years, annualRatePercentage);
+            const maturityAmount = amount * factor;
+            // --- END NEW LOGIC ---
 
             const roundedMaturity = Math.round(maturityAmount);
 
-            tableHTML += `<tr><td>${years} Year${years > 1 ? 's' : ''}</td><td>₹ ${roundedMaturity.toLocaleString('en-IN')}</td></tr>`;
+            // !!! MODIFIED: Included Rate in the table row !!!
+            tableHTML += `<tr><td>${years} Year${years > 1 ? 's' : ''}</td><td>${annualRatePercentage}%</td><td>₹ ${roundedMaturity.toLocaleString('en-IN')}</td></tr>`;
         }
 
         tableHTML += `</tbody></table>`;
@@ -787,7 +824,6 @@ function calculateInvestmentReturns() {
         investmentAmountInput.classList.remove('invalid-input'); 
         return; 
     }
-
     // --- Existing Amount Validation for other products (Runs ONLY if not an RD product) ---
     if (companyName === "SANGEETH NIDHI") {
         if (amount < 5000) {
