@@ -119,9 +119,10 @@ const investmentData = {
     },
     "SANGEETH NIDHI": {
         "Sangeeth Nidhi Deposits": [
-            { "period": "6 MONTHS to Less than 1 Year", "yearly": "9%", "remarks": "5000 and above", "type": "SD" },
-            { "period": "1 Year to less than 3Years", "monthly": "11.50%", "yearly": "12.00%", "remarks": "5000 and above", "type": "SD" },
-            { "period": "3 Year to 5 Years", "monthly": "12%", "yearly": "12.50%", "remarks": "5000 and above", "type": "SD" }
+            { "period": "6 MONTHS to Less than 1 Year", "yearly": "9%", "remarks": "5000 and above", "type": "SD", "validPeriods": [1], "defaultPeriod": 1 },
+            { "period": "1 Year to less than 3Years", "monthly": "10.50%", "yearly": "11.00%", "remarks": "5000 and above", "type": "SD", "validPeriods": [1, 2], "defaultPeriod": 1 },
+            { "period": "3 Year to 5 Years", "monthly": "11%", "yearly": "11.50%", "remarks": "5000 and above", "type": "SD", "validPeriods": [3, 4, 5], "defaultPeriod": 3 },
+	    { "period": "5 Years", "monthly": "12%", "yearly": "12.50%", "remarks": "5 LAKHS and above", "type": "SD", "validPeriods": [5], "defaultPeriod": 5, "minAmt": 500000 }
         ]
     },
     // --- NEW: Recurring Deposit Product Category ---
@@ -133,9 +134,9 @@ const investmentData = {
                 "rateStructure": {
                     "1": 10.0, // 10% for 1 year
                     "2": 10.0, // 10% for 2 years
-                    "3": 12.0, // 12% for 3 years
-                    "4": 12.0, // 12% for 4 years
-                    "5": 12.0  // 12% for 5 years
+                    "3": 11.50, // 12% for 3 years
+                    "4": 11.50, // 12% for 4 years
+                    "5": 11.50  // 12% for 5 years
                 },
                 "minAmount": 1000, // Minimum monthly deposit for RD
                 "period": "1 to 5 Years", // A general period description for display
@@ -354,46 +355,45 @@ function handleOptionSelection(index, clickedCard) {
 
 // NEW Function to control period input visibility and constraints
 function setPeriodConstraintsAndVisibility(companyName, productName) {
-    // Check if the necessary DOM elements exist
     if (!investmentPeriodControl || !investmentPeriodInput) return;
 
     const isSangeethNidhi = companyName === "SANGEETH NIDHI";
     const isNCD = productName.toLowerCase().includes('ncd');
-    const isFixedPeriod = !isSangeethNidhi && !isNCD; // SD 5.5 Year, Doubling have fixed periods
 
-    if (isFixedPeriod) {
-        // Hide and clear for fixed period products
+    if (!isSangeethNidhi && !isNCD) {
         investmentPeriodControl.classList.add('hidden');
         investmentPeriodInput.value = '';
-        investmentPeriodInput.classList.remove('invalid-input');
         return;
     }
 
-    // Show and set constraints for flexible period products
     investmentPeriodControl.classList.remove('hidden');
-    investmentPeriodInput.classList.remove('invalid-input');
     
-    if (isSangeethNidhi) {
-        // Sangeeth Nidhi: 1 to 5 years
-        investmentPeriodInput.min = '1';
-        investmentPeriodInput.max = '5';
-        investmentPeriodInput.placeholder = '1 to 5 Years';
-        // Clear value if outside new range or no value
-        const currentVal = parseFloat(investmentPeriodInput.value);
-        if (isNaN(currentVal) || currentVal < 1 || currentVal > 5) {
-            investmentPeriodInput.value = '';
+    // Logic for Sangeeth Nidhi constraints
+    if (isSangeethNidhi && currentSelectedDetailForCalc) {
+        const detail = currentSelectedDetailForCalc;
+        
+        // 1. Set the valid year range for the input box
+        if (detail.validPeriods) {
+            investmentPeriodInput.min = Math.min(...detail.validPeriods);
+            investmentPeriodInput.max = Math.max(...detail.validPeriods);
+            investmentPeriodInput.value = detail.defaultPeriod;
+        }
+        
+        // 2. Set the minimum amount (e.g., 5 Lakhs for Option 4)
+        if (detail.minAmt) {
+            investmentAmountInput.value = detail.minAmt;
+            investmentAmountInput.min = detail.minAmt;
+            allowedMinAmount = detail.minAmt;
+            // Update placeholder to show the required amount
+            investmentAmountInput.placeholder = "Enter ₹ " + detail.minAmt.toLocaleString('en-IN') + " or more";
         }
     } else if (isNCD) {
-        // NCD: 1 to 10 years
+        // Keep existing NCD logic
         investmentPeriodInput.min = '1';
         investmentPeriodInput.max = '10';
         investmentPeriodInput.placeholder = '1 to 10 Years';
-        // Clear value if outside new range or no value
-        const currentVal = parseFloat(investmentPeriodInput.value);
-        if (isNaN(currentVal) || currentVal < 1 || currentVal > 10) {
-            investmentPeriodInput.value = '';
-        }
     }
+
 }
 
 
