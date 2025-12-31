@@ -120,8 +120,8 @@ const investmentData = {
     "SANGEETH NIDHI": {
         "Sangeeth Nidhi Deposits": [
             { "period": "6 MONTHS to Less than 1 Year", "yearly": "9%", "remarks": "5000 and above", "type": "SD", "validPeriods": [1], "defaultPeriod": 1 },
-            { "period": "1 Year to less than 3Years", "monthly": "10.50%", "yearly": "11.00%", "remarks": "5000 and above", "type": "SD", "validPeriods": [1, 2], "defaultPeriod": 1 },
-            { "period": "3 Year to 5 Years", "monthly": "11%", "yearly": "11.50%", "remarks": "5000 and above", "type": "SD", "validPeriods": [3, 4, 5], "defaultPeriod": 3 },
+            { "period": "1 Year to less than 3Years", "monthly": "9.50%", "yearly": "10.00%", "remarks": "5000 and above", "type": "SD", "validPeriods": [1, 2], "defaultPeriod": 1 },
+            { "period": "3 Year to 5 Years", "monthly": "10.00%", "yearly": "10.50%", "remarks": "5000 and above", "type": "SD", "validPeriods": [3, 4, 5], "defaultPeriod": 3 },
 	    { "period": "5 Years", "monthly": "12%", "yearly": "12.50%", "remarks": "5 LAKHS and above", "type": "SD", "validPeriods": [5], "defaultPeriod": 5, "minAmt": 500000 }
         ]
     },
@@ -134,9 +134,9 @@ const investmentData = {
                 "rateStructure": {
                     "1": 10.0, // 10% for 1 year
                     "2": 10.0, // 10% for 2 years
-                    "3": 11.50, // 12% for 3 years
-                    "4": 11.50, // 12% for 4 years
-                    "5": 11.50  // 12% for 5 years
+                    "3": 10.0, // 12% for 3 years
+                    "4": 10.0, // 12% for 4 years
+                    "5": 10.0  // 12% for 5 years
                 },
                 "minAmount": 1000, // Minimum monthly deposit for RD
                 "period": "1 to 5 Years", // A general period description for display
