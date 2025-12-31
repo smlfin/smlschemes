@@ -416,7 +416,7 @@ function displaySingleProductDetailsAndCalculator(companyName, productName, deta
 
     if (isRDProduct) {
         cardContent += `<p><strong>Product:</strong> ${detail.name || productName}</p>`;
-        cardContent += `<p><strong>Interest Rate:</strong> Up to 11.50%</p>`;
+        cardContent += `<p><strong>Interest Rate:</strong> Up to 10.00%</p>`;
         cardContent += `<p><strong>Period:</strong> ${detail.period}</p>`;
         cardContent += `<p><strong>Minimum Monthly Deposit:</strong> ₹ ${detail.minAmount.toLocaleString('en-IN')}</p>`;
     } else if (companyName === "SANGEETH NIDHI") {
