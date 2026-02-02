@@ -51,7 +51,7 @@ const investmentData = {
                 "monthly": "12.5%",
                 "yearly": "Not Available",
                 "period": "10 YEARS", 
-                "remarks": "2 Lakhs to less than 15 Lakhs",
+                "remarks": "3 Lakhs to less than 15 Lakhs",
                 "closureRemark": "Closure allowed after 1 year.",
                 "closureTerms": [
                     { "period": "Between 1 & 2 year", "cut": "1%" },
@@ -91,7 +91,7 @@ const investmentData = {
                 "monthly": "12.50%",
                 "yearly": "13.00%",
                 "period": "10 YEARS",
-                "remarks": "2 Lakhs to less than 15 Lakhs",
+                "remarks": "5 Lakhs to less than 15 Lakhs",
                 "closureRemark": "Closure allowed after 1 year.",
                 "closureTerms": [
                     { "period": "Between 1 & 2 year", "cut": "2%" },
