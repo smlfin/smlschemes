@@ -121,7 +121,8 @@ const investmentData = {
         "Sangeeth Nidhi Deposits": [
             { "period": "6 MONTHS to Less than 1 Year", "yearly": "9%", "remarks": "5000 and above", "type": "SD", "validPeriods": [1], "defaultPeriod": 1 },
             
-            { "period": "1 Year to 5 Years", "monthly": "11.00%", "yearly": "11.50%", "remarks": "5000 and above", "type": "SD", "validPeriods": [1,2,3, 4, 5], "defaultPeriod": 1 },
+            { "period": "1 Year to Less than 3 Year", "monthly": "10.00%", "yearly": "10.50%", "remarks": "5000 and above", "type": "SD", "validPeriods": [1,2,3, 4, 5], "defaultPeriod": 1 },
+			"period": "3 Year to 5 Years", "monthly": "10.50%", "yearly": "11.00%", "remarks": "5000 and above", "type": "SD", "validPeriods": [1,2,3, 4, 5], "defaultPeriod": 1
 	    { "period": "5 Years", "monthly": "12%", "yearly": "12.50%", "remarks": "5 LAKHS and above", "type": "SD", "validPeriods": [5], "defaultPeriod": 5, "minAmt": 500000 }
         ]
     },
