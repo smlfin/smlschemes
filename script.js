@@ -1,12 +1,11 @@
 // Increment CACHE_NAME for Service Worker update to force fresh load of ALL files
-const CACHE_NAME = 'investment-comparator-v28'; // NEW VERSION for Vanchinad NCD Update
+const CACHE_NAME = 'investment-comparator-v30'; // Fixed image cache paths
 const urlsToCache = [
   './',
-  './index.html',
+  './index.htm',
   './style.css',
   './script.js',
   './manifest.json',
-  // Add your icon paths here:
   './icons/icon-72x72.png',
   './icons/icon-96x96.png',
   './icons/icon-128x128.png',
@@ -15,11 +14,9 @@ const urlsToCache = [
   './icons/icon-192x192.png',
   './icons/icon-384x384.png',
   './icons/icon-512x512.png',
-  // Add image paths for service worker cache
-  './images/sml.jpeg',
-  './images/vfl.jpeg',
-  './images/snl.jpeg',
-  './images/default.jpeg' // Added for generic products like RD, ensure this image exists
+  './sml.jpg',
+  './vfl.jpg',
+  './snl.jpg'
 ];
 
 // Service Worker Registration
@@ -39,19 +36,19 @@ if ('serviceWorker' in navigator) {
 const investmentData = {
     "SML Finance Ltd": {
         "SD 5.5 Year": [
-            { "monthly": "12.5%", "yearly": "13.0%", "period": "5.5 YEARS", "remarks": "5000 to less than 5 Lakhs", "generalRemark": "No Premature Closing Allowed", "type": "SD" },
+            { "monthly": "12.5%", "yearly": "13.0%", "period": "5.5 YEARS", "remarks": "10000 to less than 5 Lakhs", "generalRemark": "No Premature Closing Allowed", "type": "SD" },
             { "monthly": "13.0%", "yearly": "13.5%", "period": "5.5 YEARS", "remarks": "5 Lakhs to less than 25 Lakhs", "generalRemark": "No Premature Closing Allowed", "type": "SD" },
             { "monthly": "14.0%", "yearly": "14.5%", "period": "5.5 YEARS", "remarks": "25 Lakhs & above", "generalRemark": "No Premature Closing Allowed", "type": "SD" }
         ],
         "Doubling Scheme": [
-            { "period": "70 Months", "remarks": "5000 & Above", "doublingRemark": "Doubles on maturity.", "generalRemark": "No Premature Closing Allowed", "type": "Doubling" }
+            { "period": "70 Months", "remarks": "10000 & Above", "doublingRemark": "Doubles on maturity.", "generalRemark": "No Premature Closing Allowed", "type": "Doubling" }
         ],
         "Non-Convertible Debentures (NCD)": [
             {
                 "monthly": "12.5%",
                 "yearly": "Not Available",
                 "period": "10 YEARS", 
-                "remarks": "3 Lakhs to less than 15 Lakhs",
+                "remarks": "2 Lakhs to less than 15 Lakhs",
                 "closureRemark": "Closure allowed after 1 year.",
                 "closureTerms": [
                     { "period": "Between 1 & 2 year", "cut": "1%" },
@@ -79,50 +76,34 @@ const investmentData = {
     },
     "Vanchinad Finance (P) Ltd": {
         "SD 5.5 Year": [
-            { "monthly": "12%", "yearly": "12.50%", "period": "5.5 YEARS", "remarks": "5000 to less than 5 Lakhs", "generalRemark": "No Premature Closing Allowed", "type": "SD" },
-            { "monthly": "12.50%", "yearly": "13%", "period": "5.5 YEARS", "remarks": "5 Lakhs to less than 25 Lakhs", "generalRemark": "No Premature Closing Allowed", "type": "SD" },
-            { "monthly": "13.50%", "yearly": "14%", "period": "5.5 YEARS", "remarks": "25 Lakhs & above", "generalRemark": "No Premature Closing Allowed", "type": "SD" }
+            { "monthly": "12.5%", "yearly": "13.0%", "period": "5.5 YEARS", "remarks": "10000 to less than 5 Lakhs", "generalRemark": "No Premature Closing Allowed", "type": "SD" },
+            { "monthly": "13.0%", "yearly": "13.5%", "period": "5.5 YEARS", "remarks": "5 Lakhs to less than 25 Lakhs", "generalRemark": "No Premature Closing Allowed", "type": "SD" },
+            { "monthly": "14.0%", "yearly": "14.5%", "period": "5.5 YEARS", "remarks": "25 Lakhs & above", "generalRemark": "No Premature Closing Allowed", "type": "SD" }
         ],
         "Sub - ordinated Debt Doubling Scheme": [
-            { "period": "70 Months", "remarks": "5000 & Above", "doublingRemark": "Doubles on maturity.", "generalRemark": "No Premature Closing Allowed", "type": "Doubling" }
+            { "period": "70 Months", "remarks": "10000 & Above", "doublingRemark": "Doubles on maturity.", "generalRemark": "No Premature Closing Allowed", "type": "Doubling" }
         ],
         "Non-Convertible Debentures (NCD)": [
             {
-                "monthly": "12.50%",
-                "yearly": "13.00%",
-                "period": "10 YEARS",
-                "remarks": "5 Lakhs to less than 15 Lakhs",
-                "closureRemark": "Closure allowed after 1 year.",
-                "closureTerms": [
-                    { "period": "Between 1 & 2 year", "cut": "2%" },
-                    { "period": "Between 2 & 3 year", "cut": "1%" },
-                    { "period": "After 3 year", "cut": "No cut" },
-                    { "period": "If closed after 3 years & between 2 Anniversary Years", "cut": "Effective Rate: 9%" }
-                ],
-                "type": "NCD"
-            },
-            {
-                "monthly": "13.00%",
-                "yearly": "13.50%",
-                "period": "10 YEARS",
-                "remarks": "15 Lakhs & above",
-                "closureRemark": "Closure allowed after 1 year.",
-                "closureTerms": [
-                    { "period": "Between 1 & 2 year", "cut": "2%" },
-                    { "period": "Between 2 & 3 year", "cut": "1%" },
-                    { "period": "After 3 year", "cut": "No cut" },
-                    { "period": "If closed after 3 years & between 2 Anniversary Years", "cut": "Effective Rate: 9%" }
-                ],
-                "type": "NCD"
+                "type": "NCD",
+                "noCurrentIssue": true,
+                "monthly": "N/A",
+                "yearly": "N/A",
+                "period": "N/A",
+                "remarks": "Currently no NCD issue.",
+                "closureRemark": "N/A",
+                "closureTerms": []
             }
         ]
     },
     "SANGEETH NIDHI": {
         "Sangeeth Nidhi Deposits": [
-            { "period": "6 MONTHS to Less than 1 Year", "yearly": "9%", "remarks": "5000 and above", "type": "SD", "validPeriods": [1], "defaultPeriod": 1 },
-            { "period": "1 Year to Less than 3 Year", "monthly": "10.00%", "yearly": "10.50%", "remarks": "5000 and above", "type": "SD", "validPeriods": [1,2,3, 4, 5], "defaultPeriod": 1 },
-			 { "period": "3 Year to 5 Years", "monthly": "10.50%", "yearly": "11.00%", "remarks": "5000 and above", "type": "SD", "validPeriods": [1,2,3, 4, 5], "defaultPeriod": 1 },
-	    { "period": "5 Years", "monthly": "12%", "yearly": "12.50%", "remarks": "5 LAKHS and above", "type": "SD", "validPeriods": [5], "defaultPeriod": 5, "minAmt": 500000 }
+            { "period": "6 MONTHS to Less than 1 Year", "yearly": "9%", "remarks": "10000 and above", "type": "SD", "validPeriods": [1], "defaultPeriod": 1 },
+            
+            { "period": "1 Year", "monthly": "11.00%", "yearly": "11.50%", "remarks": "10000 and above", "type": "SD", "validPeriods": [1], "defaultPeriod": 1 },
+{ "period": "2 Year", "monthly": "11.50%", "yearly": "12.00%", "remarks": "10000 and above", "type": "SD", "validPeriods": [1,2], "defaultPeriod": 1 },
+            { "period": "3 Year to 5 Years", "monthly": "12.50%", "yearly": "12.50%", "remarks": "10000 and above", "type": "SD", "validPeriods": [1,2,3, 4, 5], "defaultPeriod": 3 }
+           
         ]
     },
     "Special Calculators": {
@@ -131,13 +112,13 @@ const investmentData = {
                 "type": "RD",
                 "rateStructure": {
                     "1": 10.0,
-                    "2": 10.0,
-                    "3": 10.0,
-                    "4": 10.0,
-                    "5": 10.0 
+                    "2": 11.0,
+                    "3": 12.0,
+                    "4": 12.0,
+                    "5": 12.0 
                 },
                 "minAmount": 1000,
-                "period": "1 to 5 Years",
+                "period": "1 Year :- 10%. 2 Year :- 11%. 3 to 5 Years:- 12%",
                 "displayRemarks": "Monthly Deposit (₹1000 or more)"
             }
         ]
@@ -258,6 +239,15 @@ function displayProductOptions(companyName, productName) {
     }
 
     detailsArray.forEach((detail, index) => {
+        // Special handling for "no current issue" NCD notice
+        if (detail.noCurrentIssue) {
+            const noticeCard = document.createElement('div');
+            noticeCard.classList.add('product-card', 'no-issue-notice');
+            noticeCard.innerHTML = `<p class="general-remark" style="text-align:center; font-size:1.05em; padding: 1em 0;">⚠️ Currently no NCD issue.</p>`;
+            productOptionsGrid.appendChild(noticeCard);
+            return;
+        }
+
         const card = document.createElement('div');
         card.classList.add('product-card');
         card.addEventListener('click', () => handleOptionSelection(index, card));
@@ -375,7 +365,7 @@ function displaySingleProductDetailsAndCalculator(companyName, productName, deta
 
     if (isRDProduct) {
         cardContent += `<p><strong>Product:</strong> ${detail.name || productName}</p>`;
-        cardContent += `<p><strong>Interest Rate:</strong> Up to 10.00%</p>`;
+        cardContent += `<p><strong>Interest Rate:</strong> Up to 12.00%</p>`;
         cardContent += `<p><strong>Period:</strong> ${detail.period}</p>`;
         cardContent += `<p><strong>Minimum Monthly Deposit:</strong> ₹ ${detail.minAmount.toLocaleString('en-IN')}</p>`;
     } else if (companyName === "SANGEETH NIDHI") {
@@ -609,11 +599,11 @@ function setAmountConstraints(detail) {
     if (companySelect.value === "SANGEETH NIDHI") {
         specificAmountRequired = false;
         investmentAmountInput.readOnly = false;
-        investmentAmountInput.min = '5000';
+        investmentAmountInput.min = '10000';
         investmentAmountInput.max = '';
-        allowedMinAmount = 5000;
+        allowedMinAmount = 10000;
         allowedMaxAmount = Infinity;
-        investmentAmountInput.placeholder = 'Enter ₹ 5,000 and above';
+        investmentAmountInput.placeholder = 'Enter ₹ 10,000 and above';
         return;
     }
 
@@ -739,8 +729,8 @@ function calculateInvestmentReturns() {
     }
 
     if (companyName === "SANGEETH NIDHI") {
-        if (amount < 5000) {
-            calculatorResultsDiv.innerHTML = `<p class="error-message">Please enter an amount of ₹ 5,000 or more for Sangeeth Nidhi.</p>`;
+        if (amount < 10000) {
+            calculatorResultsDiv.innerHTML = `<p class="error-message">Please enter an amount of ₹ 10,000 or more for Sangeeth Nidhi.</p>`;
             investmentAmountInput.classList.add('invalid-input');
             return;
         }
