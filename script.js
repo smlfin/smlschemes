@@ -101,7 +101,7 @@ const investmentData = {
             { "period": "6 MONTHS to Less than 1 Year", "yearly": "9%", "remarks": "10000 and above", "type": "SD", "validPeriods": [1], "defaultPeriod": 1 },
             
             { "period": "1 Year", "monthly": "11.00%", "yearly": "11.50%", "remarks": "10000 and above", "type": "SD", "validPeriods": [1], "defaultPeriod": 1 },
-{ "period": "2 Year", "monthly": "11.50%", "yearly": "12.00%", "remarks": "10000 and above", "type": "SD", "validPeriods": [1,2], "defaultPeriod": 1 },
+{ "period": "2 Year", "monthly": "11.50%", "yearly": "12.00%", "remarks": "10000 and above", "type": "SD", "validPeriods": [1,2], "defaultPeriod": 2 },
             { "period": "3 Year to 5 Years", "monthly": "12.50%", "yearly": "12.50%", "remarks": "10000 and above", "type": "SD", "validPeriods": [1,2,3, 4, 5], "defaultPeriod": 3 }
            
         ]
