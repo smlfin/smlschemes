@@ -36,16 +36,16 @@ if ('serviceWorker' in navigator) {
 const investmentData = {
     "SML Finance Ltd": {
         "SD 5.5 Year": [
-            { "monthly": "12.5%", "yearly": "13.0%", "period": "5.5 YEARS", "remarks": "10000 to less than 5 Lakhs", "generalRemark": "No Premature Closing Allowed", "type": "SD" },
-            { "monthly": "13.0%", "yearly": "13.5%", "period": "5.5 YEARS", "remarks": "5 Lakhs to less than 25 Lakhs", "generalRemark": "No Premature Closing Allowed", "type": "SD" },
-            { "monthly": "14.0%", "yearly": "14.5%", "period": "5.5 YEARS", "remarks": "25 Lakhs & above", "generalRemark": "No Premature Closing Allowed", "type": "SD" }
+            { "monthly": "11.5%", "yearly": "12.0%", "period": "5.5 YEARS", "remarks": "10000 to less than 5 Lakhs", "generalRemark": "No Premature Closing Allowed", "type": "SD" },
+            { "monthly": "12.0%", "yearly": "12.5%", "period": "5.5 YEARS", "remarks": "5 Lakhs to less than 25 Lakhs", "generalRemark": "No Premature Closing Allowed", "type": "SD" },
+            { "monthly": "13.0%", "yearly": "13.5%", "period": "5.5 YEARS", "remarks": "25 Lakhs & above", "generalRemark": "No Premature Closing Allowed", "type": "SD" }
         ],
         "Doubling Scheme": [
             { "period": "70 Months", "remarks": "10000 & Above", "doublingRemark": "Doubles on maturity.", "generalRemark": "No Premature Closing Allowed", "type": "Doubling" }
         ],
         "Non-Convertible Debentures (NCD)": [
             {
-                "monthly": "12.5%",
+                "monthly": "11.5%",
                 "yearly": "Not Available",
                 "period": "10 YEARS", 
                 "remarks": "2 Lakhs to less than 15 Lakhs",
@@ -59,7 +59,7 @@ const investmentData = {
                 "type": "NCD"
             },
             {
-                "monthly": "13%",
+                "monthly": "12%",
                 "yearly": "Not Available",
                 "period": "10 YEARS",
                 "remarks": "15 Lakhs & above",
@@ -76,9 +76,9 @@ const investmentData = {
     },
     "Vanchinad Finance (P) Ltd": {
         "SD 5.5 Year": [
-            { "monthly": "12.5%", "yearly": "13.0%", "period": "5.5 YEARS", "remarks": "10000 to less than 5 Lakhs", "generalRemark": "No Premature Closing Allowed", "type": "SD" },
-            { "monthly": "13.0%", "yearly": "13.5%", "period": "5.5 YEARS", "remarks": "5 Lakhs to less than 25 Lakhs", "generalRemark": "No Premature Closing Allowed", "type": "SD" },
-            { "monthly": "14.0%", "yearly": "14.5%", "period": "5.5 YEARS", "remarks": "25 Lakhs & above", "generalRemark": "No Premature Closing Allowed", "type": "SD" }
+            { "monthly": "11.5%", "yearly": "12.0%", "period": "5.5 YEARS", "remarks": "10000 to less than 5 Lakhs", "generalRemark": "No Premature Closing Allowed", "type": "SD" },
+            { "monthly": "12.0%", "yearly": "12.5%", "period": "5.5 YEARS", "remarks": "5 Lakhs to less than 25 Lakhs", "generalRemark": "No Premature Closing Allowed", "type": "SD" },
+            { "monthly": "13.0%", "yearly": "13.5%", "period": "5.5 YEARS", "remarks": "25 Lakhs & above", "generalRemark": "No Premature Closing Allowed", "type": "SD" }
         ],
         "Sub - ordinated Debt Doubling Scheme": [
             { "period": "70 Months", "remarks": "10000 & Above", "doublingRemark": "Doubles on maturity.", "generalRemark": "No Premature Closing Allowed", "type": "Doubling" }
