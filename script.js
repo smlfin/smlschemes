@@ -43,34 +43,16 @@ const investmentData = {
         "Doubling Scheme": [
             { "period": "70 Months", "remarks": "10000 & Above", "doublingRemark": "Doubles on maturity.", "generalRemark": "No Premature Closing Allowed", "type": "Doubling" }
         ],
-        "Non-Convertible Debentures (NCD)": [
+         "Non-Convertible Debentures (NCD)": [
             {
-                "monthly": "11.5%",
-                "yearly": "Not Available",
-                "period": "10 YEARS", 
-                "remarks": "2 Lakhs to less than 15 Lakhs",
-                "closureRemark": "Closure allowed after 1 year.",
-                "closureTerms": [
-                    { "period": "Between 1 & 2 year", "cut": "1%" },
-                    { "period": "Between 2 & 3 year", "cut": ".50%" },
-                    { "period": "After 3 year", "cut": "No cut" },
-                    { "period": "If closed after 3 years & between 2 Anniversary Years", "cut": "Effective Rate: 9%" }
-                ],
-                "type": "NCD"
-            },
-            {
-                "monthly": "12%",
-                "yearly": "Not Available",
-                "period": "10 YEARS",
-                "remarks": "15 Lakhs & above",
-                "closureRemark": "Closure allowed after 1 year.",
-                "closureTerms": [
-                    { "period": "Between 1 & 2 year", "cut": "1%" },
-                    { "period": "Between 2 & 3 year", "cut": ".50%" },
-                    { "period": "After 3 year", "cut": "No cut" },
-                    { "period": "If closed after 3 years & between 2 Anniversary Years", "cut": "Effective Rate: 9%" }
-                ],
-                "type": "NCD"
+                "type": "NCD",
+                "noCurrentIssue": true,
+                "monthly": "N/A",
+                "yearly": "N/A",
+                "period": "N/A",
+                "remarks": "Currently no NCD issue.",
+                "closureRemark": "N/A",
+                "closureTerms": []         
             }
         ]
     },
